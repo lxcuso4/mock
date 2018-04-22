@@ -8,7 +8,7 @@
  * }
  *
  */
-const Fs = require('../../utils/wrap');
+const Fs = require('aw-fs');
 const path = require('path');
 var fs = new Fs([{name: 'access', module: 2}]);
 
