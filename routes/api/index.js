@@ -86,10 +86,10 @@ function reStore(req, res,next) {
 function test(type,req,res,next) {
   var rule = {
     url(value) {
-      return /^\/[^\.\s]+$/g.test(value)
+      return /^\/[^\s]+$/g.test(value)
     },
     newUrl(value){
-      return /^\/[^\.\s]+$/g.test(value)
+      return !value || /^\/[^\.\s]+$/g.test(value)
     },
     host(value){
       return !value || /^[^\/\s]+$/g.test(value)
@@ -122,6 +122,7 @@ function test(type,req,res,next) {
       }
       break;
     case 'update':
+      re.json = req.body.data;
       re.newUrl = req.body.newUrl||re.url;
       break;
     case 'query':

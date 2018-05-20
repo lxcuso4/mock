@@ -6,7 +6,7 @@ const api = require('./api/index');
 const home = require('./users');
 
 
-router.use('/api',[bodyParser.json(),bodyParser.urlencoded({ extended: false }),api]);
+router.use('/api',[bodyParser.json(),bodyParser.urlencoded({ extended: true }),api]);
 router.use(home);
 
 

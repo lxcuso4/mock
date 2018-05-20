@@ -85,7 +85,7 @@ module.exports = {
       return {code: -1, msg: `url:${url}已存在`};
     }
     var hostPath = path.resolve(dbPath, host);
-    var json = JSON.stringify(json);
+    var json = JSON.stringify(json,null,2);
     var hasDir = await fs.access(hostPath);
     if (hasDir) {
       await fs.mkdir(hostPath);
@@ -106,11 +106,7 @@ module.exports = {
   async update(url, json, host, newUrl){
     host = host || store;
     var filePath = getUrlPath(newUrl, host);
-    var hasFile = await fs.access(filePath);
-    if (!hasFile) {
-      return {code: -1, msg: `newUrl:${newUrl}已存在`};
-    }
-    var json = JSON.stringify(json);
+    var json = JSON.stringify(json,null,2);
     fs.writeFile(filePath, json);
     await this.updateStoreConfig('update', url, host, {url: newUrl});
     if (url !== newUrl) {
@@ -120,6 +116,7 @@ module.exports = {
   async query(host, page){
     host = host || store;
     page = page || 0;
+    //缓存对应 host 的 config排序后的 文件
     var config = this.query[host];
     if (!config) {
       var configPath = path.join(dbPath, host, 'config.json');
@@ -129,15 +126,26 @@ module.exports = {
         return (b.weight + b.updateTime) - (a.weight + a.updateTime);
       });
     }
+    // config:[ {
+    //   "url": "/h5/my/b",
+    //   "weight": 0,
+    //   "updateTime": 1524308254592
+    // },]
     var start = pageCount * page;
     var result = config.slice(start, start + pageCount);
     if (result.length === 0)return result;
     result = await Promise.all(result.map(item => {
-      return fs.readFile(getUrlPath(item.url, host), 'utf8');
+      return new Promise(function(reslove, reject) {
+      fs.readFile(getUrlPath(item.url, host), 'utf8').then(json=>{
+        reslove({
+          url:item.url,
+          data:JSON.parse(json)
+        })
+      })
+
+      })
     }));
-    return result.map(item => {
-      return JSON.parse(item);
-    });
+    return result;
   },
   async setStore(store){
     var config = getDbConfig();
