@@ -46,9 +46,10 @@ function update(req, res, next) {
 function query(req, res, next) {
   var {host,page}=test('query',...arguments);
   io.query(host,page).then(data=>{
-    var json = {code:0,msg:'ok',data:data}
-    if(data.length === 0){
-      Object.assign(json,{code:-1,msg:`page ${page}:无数据`})
+    var json = {code:0,msg:'ok'};
+    json = Object.assign(json, data)
+    if(data.data.length === 0){
+      Object.assign(json,{code:-1,msg:`当前页无数据`})
     }
     res.json(json)
   },err=>{
