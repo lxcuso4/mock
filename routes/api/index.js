@@ -90,7 +90,7 @@ function test(type,req,res,next) {
       return /^\/[^\s]+$/g.test(value)
     },
     newUrl(value){
-      return !value || /^\/[^\.\s]+$/g.test(value)
+      return !value || /^\/[^\s]+$/g.test(value)
     },
     host(value){
       return !value || /^[^\/\s]+$/g.test(value)
