@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = require('./routes/index');
 
 const app = express();
-global.log = console.log;
+const service = require('./service/index')
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -43,3 +43,6 @@ app.use(function(err, req, res, next) {
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
 });
+
+// 初始化 api 服务
+service.init()

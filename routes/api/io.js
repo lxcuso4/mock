@@ -12,24 +12,10 @@ const Fs = require('aw-fs');
 const path = require('path');
 var fs = new Fs([{name: 'access', module: 2}]);
 
-const dbPath = path.resolve(__dirname, '../../db');
-const dbConfigPath = path.join(dbPath, 'config.json');
-const tag = '___';
-const pageCount = 100;
+const {getDbConfig,tag,pageCount,dbPath} = require('../config')
+
 const store = getDbConfig().host;
 
-function getDbConfig() {
-  var hasConfig = fs.existsSync(dbConfigPath);
-  if (!hasConfig) {
-    var config = {
-      host: 'default'
-    }
-    fs.writeFile(dbConfigPath, JSON.stringify(config, null, 2))
-    return config;
-  }
-  var config = fs.readFileSync(dbConfigPath, 'utf8');
-  return JSON.parse(config);
-}
 
 function getUrlPath(url, host) {
   url = url.trim();
@@ -138,11 +124,6 @@ module.exports = {
     config = config.data.sort((a, b) => {
       return (b.weight + b.updateTime) - (a.weight + a.updateTime);
     });
-    // config:[ {
-    //   "url": "/h5/my/b",
-    //   "weight": 0,
-    //   "updateTime": 1524308254592
-    // },]
     var start = pageCount * page;
     var result = config.slice(start, start + pageCount);
     result = await Promise.all(result.map(item => {
@@ -160,26 +141,5 @@ module.exports = {
       totalPage: Math.ceil(config.length/pageCount),
       data: result,
     };
-  },
-  async setStore(store){
-    var config = getDbConfig();
-    config = Object.assign(config, {store: store});
-    await fs.writeFile(dbConfigPath, JSON.stringify(config, null, 2));
-  },
-  async rmStore(store){
-    var storePath = path.join(dbPath, store);
-    await fs.rmdir(storePath);
-  },
-  async reStore(store, newStore){
-    var storePath = path.join(dbPath, store);
-    var newStorePath = path.join(dbPath, newStore);
-    var re = await Promise.all([fs.access(storePath), fs.access(newStorePath)])
-    if (re[0]) {
-      return {code: -1, msg: `store:${store}不存在`}
-    }
-    if (!re[1]) {
-      return {code: -1, msg: `store:${newStore}已存在`}
-    }
-    await fs.rename(storePath, newStorePath);
   },
 };

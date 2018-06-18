@@ -1,55 +1,41 @@
 /**
- * Created by liux on 2018/4/15.
+ * @功能名称:
+ * @文件名称: index.js.js
+ * @Date: 2018/6/18 下午7:15.
+ * @Author: liux
+ * @Copyright（C）: 2014-2018 X-Financial Inc.   All rights reserved.
  */
+
 const express = require('express');
 const router = express.Router();
+const set = require('./setStore')
 
-const io = require('./io')
+router.post('/setStore',setStore,err);
+router.post('/reStore',reStore,err);
+router.post('/rmStore',rmStore,err);
 
-router.post('/add',add,err);
-router.post('/rm',rm,err);
-router.post('/update',update,err);
-router.post('/query',query,err);
-
-
-
-function add(req, res, next) {
-  var {url,json,host,opt} = test('add',...arguments)
-  io.add(url,json,host,opt).then((json)=>{
+function setStore(req, res, next) {
+  var {store}=test('store',...arguments);
+  set.setStore(store).then(json=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
     next()
   })
 }
-function rm(req, res, next) {
-  var {url,host} = test('rm',...arguments);
-  io.rm(url,host).then(()=>{
-    res.json({code:0,msg:'ok'})
-  },err=>{
-    res.locals.err = err
-    next()
-  })
-}
-
-function update(req, res, next) {
-  var {url,json,host,newUrl} = test('update',...arguments)
-  io.update(url,json,host,newUrl).then((json)=>{
+function rmStore(req, res, next) {
+  var {store}=test('store',...arguments)
+  set.rmStore(store).then(json=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
     next()
   })
 }
-function query(req, res, next) {
-  var {host,page}=test('query',...arguments);
-  io.query(host,page).then(data=>{
-    var json = {code:0,msg:'ok'};
-    json = Object.assign(json, data)
-    if(data.data.length === 0){
-      Object.assign(json,{code:-1,msg:`当前页无数据`})
-    }
-    res.json(json)
+function reStore(req, res,next) {
+  var {store,newStore}=test('reStore',...arguments);
+  set.reStore(store,newStore).then(json=>{
+    res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
     next()
@@ -66,6 +52,12 @@ function test(type,req,res,next) {
     },
     host(value){
       return !value || /^[^\/\s]+$/g.test(value)
+    },
+    store(value){
+      return value && /^[^\/\s]+$/g.test(value)
+    },
+    newStore(value){
+      return value && /^[^\/\s]+$/g.test(value)
     },
     json(value){
       return value && typeof value === 'object'
@@ -96,6 +88,17 @@ function test(type,req,res,next) {
       re.page = req.body.page;
       delete re.url;
       break;
+    case 'store':
+      re.store = req.body.store;
+      delete re.url;
+      delete re.host;
+      break;
+    case 'reStore':
+      re.store = req.body.store;
+      re.newStore = req.body.newStore
+      delete re.url
+      delete re.host
+      break;
   }
   for(let key in re){
     if(!rule[key](re[key])){
@@ -107,7 +110,7 @@ function test(type,req,res,next) {
 }
 
 function err(req, res) {
-    var msg = JSON.stringify(res.locals.err);
-    res.json({code:-9,msg: msg || '文件操作错误',data:{}})
+  var msg = JSON.stringify(res.locals.err);
+  res.json({code:-9,msg: msg || '文件操作错误',data:{}})
 }
 module.exports = router;
