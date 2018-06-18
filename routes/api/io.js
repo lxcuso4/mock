@@ -116,7 +116,6 @@ module.exports = {
   async query(host, page){
     host = host || store;
     page = page || 0;
-    //缓存对应 host 的 config排序后的 文件
     var config = '';
     var configPath = path.join(dbPath, host, 'config.json');
     config = await fs.readFile(configPath, 'utf8');

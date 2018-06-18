@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {listen} = require('./service');
+const {listen, close} = require('./service');
 const dbPath = path.resolve(__dirname, '../db');
 const dbConfigPath = path.join(dbPath, 'config.json');
 
@@ -27,7 +27,7 @@ function init() {
   if (service && Array.isArray(service)) {
     service.forEach(item => {
       if (item.host && item.port && item.status == 1) {
-        listen(item.port, item.host);
+        listen(item.host, item.port);
       }
     });
   }
@@ -35,4 +35,4 @@ function init() {
 
 
 
-module.exports = {init,}
+module.exports = {init, listen, close}

@@ -8,6 +8,7 @@
 const Fs = require('aw-fs');
 const path = require('path');
 var fs = new Fs([{name: 'access', module: 2}]);
+
 const dbPath = path.resolve(__dirname, '../db');
 const dbConfigPath = path.join(dbPath, 'config.json');
 

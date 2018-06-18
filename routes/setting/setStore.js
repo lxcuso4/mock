@@ -10,20 +10,38 @@ const Fs = require('aw-fs');
 const path = require('path');
 var fs = new Fs([{name: 'access', module: 2}]);
 
+const {listen,close} = require('../../service')
 const {dbPath,dbConfigPath,getDbConfig} = require('../config')
-
 const store = getDbConfig().host;
-module.exports = {
 
+module.exports = {
   async setStore(store){
     var config = getDbConfig();
     config = Object.assign(config, {store: store});
     await fs.writeFile(dbConfigPath, JSON.stringify(config, null, 2));
   },
-  async addStore (){
-
+  async addStore (store){
+    var config = getDbConfig();
+    var service = config.service;
+    if(service.some(item=>{
+      return item.host == store
+    })){
+      return {code:-1,msg:`${store}已存在`}
+    }
+    service.push({host:store});
+    await fs.writeFile(dbConfigPath, JSON.stringify(config, null, 2));
+    var hostPath = path.join(dbPath,store)
+    var hasDir = await fs.access(hostPath);
+    if (hasDir) {
+      await fs.mkdir(hostPath);
+    }
   },
-  async startStore(){
+  async startStore(store, port){
+    listen(store,port).then(()=>{
+
+    },()=>{
+
+    })
 
   },
   async queryStore(){

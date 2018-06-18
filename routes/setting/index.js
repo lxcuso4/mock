@@ -44,15 +44,6 @@ function reStore(req, res,next) {
 
 function test(type,req,res,next) {
   var rule = {
-    url(value) {
-      return /^\/[^\s]+$/g.test(value)
-    },
-    newUrl(value){
-      return !value || /^\/[^\s]+$/g.test(value)
-    },
-    host(value){
-      return !value || /^[^\/\s]+$/g.test(value)
-    },
     store(value){
       return value && /^[^\/\s]+$/g.test(value)
     },

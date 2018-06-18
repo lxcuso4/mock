@@ -11,11 +11,11 @@ const db = path.resolve(__dirname,'../db');
 
 var serverList = {};
 
-function listen(port, root) {
+function listen(store, port) {
   if(serverList[port]){
     return Promise.resolve({code:0,msg:`${port} 已经开启`})
   }
-  var ROOT = path.join(db, root);
+  var ROOT = path.join(db, store);
   var server = http.createServer(app);
   return new Promise(function(reslove, reject) {
     server.on('error', (e) => {
