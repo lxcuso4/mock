@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "app": "node ./app.js",
-    "dev": "node ./index.js",
-    "start": "npm run app & npm run dev"
+    "start": "npm run app"
   },
   "dependencies": {
     "aw-fs": "^1.0.2",

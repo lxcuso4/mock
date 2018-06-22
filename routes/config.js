@@ -29,10 +29,16 @@ module.exports = {
             'status': 1,
           }],
       };
-      fs.writeFile(dbConfigPath, JSON.stringify(config, null, 2));
       return config;
     }
     var config = fs.readFileSync(dbConfigPath, 'utf8');
     return JSON.parse(config);
   },
+  async writeDbConfig(conf){
+    console.log(conf)
+    var defaultConfig = this.getDbConfig();
+    var config = Object.assign(defaultConfig,conf);
+    console.log(config)
+    await fs.writeFile(dbConfigPath,JSON.stringify(config,null,2))
+  }
 };
