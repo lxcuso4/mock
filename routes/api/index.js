@@ -14,8 +14,8 @@ router.post('/query',query,err);
 
 
 function add(req, res, next) {
-  var {url,json,host,opt} = test('add',...arguments)
-  io.add(url,json,host,opt).then((json)=>{
+  var {url,json,store,opt} = test('add',...arguments)
+  io.add(url,json,store,opt).then((json)=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
@@ -23,8 +23,8 @@ function add(req, res, next) {
   })
 }
 function rm(req, res, next) {
-  var {url,host} = test('rm',...arguments);
-  io.rm(url,host).then(()=>{
+  var {url,store} = test('rm',...arguments);
+  io.rm(url,store).then(()=>{
     res.json({code:0,msg:'ok'})
   },err=>{
     res.locals.err = err
@@ -33,8 +33,8 @@ function rm(req, res, next) {
 }
 
 function update(req, res, next) {
-  var {url,json,host,newUrl} = test('update',...arguments)
-  io.update(url,json,host,newUrl).then((json)=>{
+  var {url,json,store,newUrl} = test('update',...arguments)
+  io.update(url,json,store,newUrl).then((json)=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
@@ -42,8 +42,8 @@ function update(req, res, next) {
   })
 }
 function query(req, res, next) {
-  var {host,page}=test('query',...arguments);
-  io.query(host,page).then(data=>{
+  var {store,page}=test('query',...arguments);
+  io.query(store,page).then(data=>{
     var json = {code:0,msg:'ok'};
     json = Object.assign(json, data)
     if(data.data.length === 0){
@@ -64,7 +64,7 @@ function test(type,req,res,next) {
     newUrl(value){
       return !value || /^\/[^\s]+$/g.test(value)
     },
-    host(value){
+    store(value){
       return !value || /^[^\/\s]+$/g.test(value)
     },
     json(value){
@@ -78,7 +78,7 @@ function test(type,req,res,next) {
     },
   }
   var re = {
-    host: req.body.host,
+    store: req.body.store,
     url: req.body.url
   }
   switch (type){

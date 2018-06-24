@@ -12,28 +12,28 @@ var fs = new Fs([{name: 'access', module: 2}]);
 
 const {listen, close} = require('../../service');
 const {dbPath, test, getDbConfig, writeDbConfig, copyDir,rmdir} = require('../config');
-const store = getDbConfig().host;
+const store = getDbConfig().store;
 
 const log = console.log.bind(console)
 
 
 
 module.exports = {
-  async addStore (store,fromStore){
+  async addStore (store,forkStore){
     var service = getDbConfig().service;
     if (test(store)) {
       return {code: -1, msg: `${store}已存在`};
     }
-    if(fromStore && !test(fromStore)){
-        return {code: -1, msg: `${fromStore}不存在`};
+    if(forkStore && !test(forkStore)){
+        return {code: -1, msg: `${forkStore}不存在`};
     }
-    service.push({host: store});
+    service.push({store: store});
     await writeDbConfig({service: service});
-    var hostPath = path.join(dbPath, store);
-    await fs.mkdir(hostPath);
-    if (fromStore) {
-      var sourcePath = path.join(dbPath,fromStore)
-      await copyDir(sourcePath, hostPath);
+    var storePath = path.join(dbPath, store);
+    await fs.mkdir(storePath);
+    if (forkStore) {
+      var sourcePath = path.join(dbPath,forkStore)
+      await copyDir(sourcePath, storePath);
     }
     return {data:service}
   },
@@ -42,9 +42,9 @@ module.exports = {
     if(re.code == 0){
       var service = getDbConfig().service;
       service.forEach(item=>{
-        if(item.host == store){
+        if(item.store == store){
           item.port = port;
-          item.state = 1;
+          item.state = true;
         }
       })
       await writeDbConfig({service:service})
@@ -59,7 +59,7 @@ module.exports = {
       var service = getDbConfig().service;
       service.forEach(item=>{
         if(item.port == port){
-          item.state = 0
+          item.state = false
         }
       })
       await writeDbConfig({service:service})
@@ -76,7 +76,7 @@ module.exports = {
     var service = getDbConfig().service;
     if (test(store)) {
       service = service.filter(item => {
-        return item.host != store;
+        return item.store != store;
       });
       await writeDbConfig({service: service});
       var storePath = path.join(dbPath, store);
@@ -90,7 +90,7 @@ module.exports = {
     var service = getDbConfig().service;
     var t1 = test(store)
     var t2 = service.every(item => {
-      return item.host != newStore;
+      return item.store != newStore;
     });
     if (!t1) {
       return {code: -1, msg: `store:${store}不存在`};
@@ -99,8 +99,8 @@ module.exports = {
       return {code: -1, msg: `newStore:${newStore}已存在`};
     }
     service = service.map(item => {
-      if (item.host == store) {
-        item.host = newStore;
+      if (item.store == store) {
+        item.store = newStore;
       }
       return item;
     });

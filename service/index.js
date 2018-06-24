@@ -15,14 +15,14 @@ function init() {
   var service = getDbConfig().service;
   if (service && Array.isArray(service)) {
     service.forEach(item => {
-      if (item.host && item.port && item.status == 1) {
-        listen(item.host, item.port);
+      if (item.store && item.port && item.state) {
+        listen(item.store, item.port);
       }
     });
   }
 }
 
-
+init()
 
 module.exports = {init, listen, close}
 

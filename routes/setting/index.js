@@ -18,8 +18,8 @@ router.post('/listenStore',listenStore,err);
 router.post('/closeStore',closeStore,err);
 
 function addStore(req,res,next) {
-  var {store,fromStore} = test(1,...arguments);
-  set.addStore(store,fromStore).then(json=>{
+  var {store,forkStore} = test(1,...arguments);
+  set.addStore(store,forkStore).then(json=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
@@ -85,7 +85,7 @@ function test(type,req,res,next) {
       }
       return this.newStore(value) && reg
     },
-    fromStore(value){
+    forkStore(value){
       return !value || /^\w+$/g.test(value)
     },
     newStore(value){

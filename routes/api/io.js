@@ -2,7 +2,7 @@
  * Created by liux on 2018/4/15.
  * @param Object
  * {
- * host: 'default',
+ * store: 'default',
  * url: '/h5/commom/get_config'
  * data: {something: xxx}
  * }
@@ -14,20 +14,20 @@ var fs = new Fs([{name: 'access', module: 2}]);
 
 const {getDbConfig,tag,pageCount,dbPath} = require('../config')
 
-const store = getDbConfig().host;
+const defaultStore = getDbConfig().store;
 
 
-function getUrlPath(url, host) {
+function getUrlPath(url, store) {
   url = url.trim();
   url = url.replace(/\//g, tag);
   url = url + '.json';
-  return path.resolve(dbPath, host, url);
+  return path.resolve(dbPath, store, url);
 }
 
 module.exports = {
-  async updateStoreConfig(type, url, host, opt){
+  async updateStoreConfig(type, url, store, opt){
     opt = Object.assign({weight: 0}, opt);
-    var configPath = path.join(dbPath, host, 'config.json');
+    var configPath = path.join(dbPath, store, 'config.json');
     var config = {data: []};
     var err = await fs.access(configPath);
     if (!err) {
@@ -63,61 +63,61 @@ module.exports = {
     config.data = data;
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
   },
-  async add(url, json, host, opt){
-    host = host || store;
-    var filePath = getUrlPath(url, host);
+  async add(url, json, store, opt){
+    store = store || defaultStore;
+    var filePath = getUrlPath(url, store);
     var hasFile = await fs.access(filePath);
     if (!hasFile) {
       return {code: -1, msg: `url:${url}已存在`};
     }
-    var hostPath = path.resolve(dbPath, host);
+    var storePath = path.resolve(dbPath, store);
     var data = JSON.stringify(json, null, 2);
-    var hasDir = await fs.access(hostPath);
+    var hasDir = await fs.access(storePath);
     if (hasDir) {
-      await fs.mkdir(hostPath);
+      await fs.mkdir(storePath);
     }
-    await Promise.all([fs.writeFile(filePath, data), this.updateStoreConfig('add', url, host, opt)])
+    await Promise.all([fs.writeFile(filePath, data), this.updateStoreConfig('add', url, store, opt)])
     return {
       data: {
         url: url,
-        host: host,
+        store: store,
         data: json
       }
     }
   },
-  async rm(url, host, rmconfig){
-    host = host || store;
-    var filePath = getUrlPath(url, host);
+  async rm(url, store, rmconfig){
+    store = store || defaultStore;
+    var filePath = getUrlPath(url, store);
     var err = await fs.access(filePath);
     if (!err) {
       if (!rmconfig) {
-        this.updateStoreConfig('rm', url, host);
+        this.updateStoreConfig('rm', url, store);
       }
       await fs.unlink(filePath);
     }
   },
-  async update(url, json, host, newUrl){
-    host = host || store;
-    var filePath = getUrlPath(newUrl, host);
+  async update(url, json, store, newUrl){
+    store = store || defaultStore;
+    var filePath = getUrlPath(newUrl, store);
     var data = JSON.stringify(json, null, 2);
     fs.writeFile(filePath, data);
-    await this.updateStoreConfig('update', url, host, {url: newUrl});
+    await this.updateStoreConfig('update', url, store, {url: newUrl});
     if (url !== newUrl) {
-      this.rm(url, host, true);
+      this.rm(url, store, true);
     }
     return {
       data: {
         url: newUrl,
-        host: host,
+        store: store,
         data: json
       }
     }
   },
-  async query(host, page){
-    host = host || store;
+  async query(store, page){
+    store = store || defaultStore;
     page = page || 0;
     var config = '';
-    var configPath = path.join(dbPath, host, 'config.json');
+    var configPath = path.join(dbPath, store, 'config.json');
     config = await fs.readFile(configPath, 'utf8');
     config = JSON.parse(config);
     config = config.data.sort((a, b) => {
@@ -127,7 +127,7 @@ module.exports = {
     var result = config.slice(start, start + pageCount);
     result = await Promise.all(result.map(item => {
       return new Promise(function (reslove, reject) {
-        fs.readFile(getUrlPath(item.url, host), 'utf8').then(json => {
+        fs.readFile(getUrlPath(item.url, store), 'utf8').then(json => {
           reslove({
             url: item.url,
             data: JSON.parse(json)

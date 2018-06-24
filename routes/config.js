@@ -29,12 +29,12 @@ function getDbConfig() {
   var hasConfig = fs.existsSync(dbConfigPath);
   if (!hasConfig) {
     var config = {
-      host: 'default',
+      store: 'default',
       service: [
         {
-          'host': 'default',
+          'store': 'default',
           'port': 8084,
-          'status': 1,
+          'state': true,
         }],
     };
     return config;
@@ -50,7 +50,7 @@ async function  writeDbConfig(conf){
 function test(store) {
   var service = getDbConfig().service;
   return service.some(item => {
-    return item.host == store;
+    return item.store == store;
   })
 }
 async function copyDir(sourcePath, targetPath) {
