@@ -11,26 +11,29 @@ const path = require('path');
 var fs = new Fs([{name: 'access', module: 2}]);
 
 const {listen, close} = require('../../service');
-const {dbPath, dbConfigPath, getDbConfig, writeDbConfig} = require('../config');
+const {dbPath, test, getDbConfig, writeDbConfig, copyDir,rmdir} = require('../config');
 const store = getDbConfig().host;
 
 const log = console.log.bind(console)
 
+
+
 module.exports = {
-  async addStore (store){
+  async addStore (store,fromStore){
     var service = getDbConfig().service;
-    if (service.some(item => {
-          return item.host == store;
-        })) {
+    if (test(store)) {
       return {code: -1, msg: `${store}已存在`};
     }
+    if(fromStore && !test(fromStore)){
+        return {code: -1, msg: `${fromStore}不存在`};
+    }
     service.push({host: store});
-    log(service)
     await writeDbConfig({service: service});
     var hostPath = path.join(dbPath, store);
-    var hasDir = await fs.access(hostPath);
-    if (hasDir) {
-      await fs.mkdir(hostPath);
+    await fs.mkdir(hostPath);
+    if (fromStore) {
+      var sourcePath = path.join(dbPath,fromStore)
+      await copyDir(sourcePath, hostPath);
     }
     return {data:service}
   },
@@ -71,18 +74,13 @@ module.exports = {
   },
   async rmStore(store){
     var service = getDbConfig().service;
-    if (service.some(item => {
-          return item.host == store;
-        })) {
+    if (test(store)) {
       service = service.filter(item => {
         return item.host != store;
       });
-      var storePath = path.join(dbPath, store);
-      var hasDir = await fs.access(storePath);
-      if (!hasDir) {
-        await fs.rmdir(storePath);
-      }
       await writeDbConfig({service: service});
+      var storePath = path.join(dbPath, store);
+      await rmdir(storePath);
       return {data:service}
     } else {
       return {code: -1, msg: `store:${store}不存在`};
@@ -90,9 +88,7 @@ module.exports = {
   },
   async reStore(store, newStore){
     var service = getDbConfig().service;
-    var t1 = service.some(item => {
-      return item.host == store;
-    });
+    var t1 = test(store)
     var t2 = service.every(item => {
       return item.host != newStore;
     });

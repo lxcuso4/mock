@@ -7,20 +7,9 @@
  */
 
 
-const fs = require('fs');
-const path = require('path');
-const {listen, close} = require('./service');
-const dbPath = path.resolve(__dirname, '../db');
-const dbConfigPath = path.join(dbPath, 'config.json');
 
-function getDbConfig() {
-  var hasConfig = fs.existsSync(dbConfigPath);
-  if (!hasConfig) {
-    return {};
-  }
-  var config = fs.readFileSync(dbConfigPath, 'utf8');
-  return JSON.parse(config);
-}
+const {listen, close} = require('./service');
+const {getDbConfig} = require('../routes/config')
 
 function init() {
   var service = getDbConfig().service;
@@ -36,3 +25,4 @@ function init() {
 
 
 module.exports = {init, listen, close}
+

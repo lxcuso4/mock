@@ -11,17 +11,18 @@ const db = path.resolve(__dirname,'../db');
 
 var serverList = {};
 
-function listen(store, port) {
+async function listen(store, port) {
   if(serverList[port]){
-    return Promise.resolve({code:0,msg:`${port} 已经开启`})
+    return Promise.resolve({code:-1,msg:`${port} 已被占用`})
   }
   var ROOT = path.join(db, store);
   var server = http.createServer(app);
-  return new Promise(function(reslove, reject) {
+  return new Promise(function(resolve, reject) {
     server.on('error', (e) => {
-      reject({code: -1, msg: e.toString()});
-    }).on('listening', (e) => {
-      reslove({code: 0, msg: e});
+      resolve({code: -1, msg: e.toString()});
+    })
+    server.on('listening', (e) => {
+      resolve({code: 0, msg: '已开启'});
     });
     serverList[port] = server.listen(port);
   });
@@ -48,16 +49,17 @@ function listen(store, port) {
 
 }
 
-function close(port) {
-  return new Promise(function(reslove, reject) {
-    if (!serverList[port]) {
-      reject({code: 0, msg: `${port} 端口未启用`});
-    }
+async function close(port) {
+  if (!serverList[port]) {
+    return Promise.resolve({code: -1, msg: `${port} 端口未启用`})
+  }
+  return new Promise(function(resolve, reject) {
     serverList[port].on('error', (e) => {
-      reject({code: -1, msg: e.toString()});
+      resolve({code: -1, msg: e.toString()});
     });
     serverList[port].close(function() {
-      reslove({code: 0, msg: ` ${port} 已关闭`});
+      delete serverList[port]
+      resolve({code: 0, msg: ` ${port} 已关闭`});
     });
   });
 

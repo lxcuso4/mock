@@ -7,38 +7,77 @@
  */
 const Fs = require('aw-fs');
 const path = require('path');
+const rmDir = require('rmdir');
+
 var fs = new Fs([{name: 'access', module: 2}]);
 
 const dbPath = path.resolve(__dirname, '../db');
 const dbConfigPath = path.join(dbPath, 'config.json');
 
+function rmdir(path) {
+  return new Promise(function(reslove, reject) {
+    rmDir(path , function (err, dirs, files) {
+      if(err){
+        reject(err)
+      }else {
+        reslove(dirs)
+      }
+    });
+  })
+}
+function getDbConfig() {
+  var hasConfig = fs.existsSync(dbConfigPath);
+  if (!hasConfig) {
+    var config = {
+      host: 'default',
+      service: [
+        {
+          'host': 'default',
+          'port': 8084,
+          'status': 1,
+        }],
+    };
+    return config;
+  }
+  var config = fs.readFileSync(dbConfigPath, 'utf8');
+  return JSON.parse(config);
+}
+async function  writeDbConfig(conf){
+  var defaultConfig = getDbConfig();
+  var config = Object.assign(defaultConfig,conf);
+  await fs.writeFile(dbConfigPath,JSON.stringify(config,null,2))
+}
+function test(store) {
+  var service = getDbConfig().service;
+  return service.some(item => {
+    return item.host == store;
+  })
+}
+async function copyDir(sourcePath, targetPath) {
+  var re = await fs.access(targetPath);
+  if(re){
+    await fs.mkdir(targetPath)
+  }
+  var list = await fs.readdir(sourcePath);
+  var arr = list.map(item=>{
+    return fs.copyFile(path.join(sourcePath,item), path.join(targetPath,item))
+  })
+  return  Promise.all(arr);
+}
 module.exports = {
   dbPath: dbPath,
   dbConfigPath: dbConfigPath,
   tag:'___',
   pageCount:100,
-  getDbConfig() {
-    var hasConfig = fs.existsSync(dbConfigPath);
-    if (!hasConfig) {
-      var config = {
-        host: 'default',
-        service: [
-          {
-            'host': 'default',
-            'port': 8084,
-            'status': 1,
-          }],
-      };
-      return config;
-    }
-    var config = fs.readFileSync(dbConfigPath, 'utf8');
-    return JSON.parse(config);
-  },
-  async writeDbConfig(conf){
-    console.log(conf)
-    var defaultConfig = this.getDbConfig();
-    var config = Object.assign(defaultConfig,conf);
-    console.log(config)
-    await fs.writeFile(dbConfigPath,JSON.stringify(config,null,2))
-  }
+  getDbConfig,
+  writeDbConfig,
+  test,
+  copyDir,
+  rmdir
 };
+
+// copyDir("/Users/liux/node/express-test/db/a", "/Users/liux/node/express-test/db/bbb").then(json=>{
+//   console.log(1,json)
+// },err=>{
+//   console.log(2,err)
+// })
