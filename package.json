@@ -6,6 +6,12 @@
     "app": "node ./app.js",
     "start": "npm run app"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@git.yingzhongtong.com:bj_fe/tools/mockServer.git"
+  },
+  "author": "liux",
+  "license": "ISC",
   "dependencies": {
     "aw-fs": "^1.0.2",
     "body-parser": "~1.17.1",
