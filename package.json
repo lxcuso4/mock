@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "app": "node ./app.js",
-    "start": "npm run app"
+    "start": "pm2 start ./app.js"
   },
   "repository": {
     "type": "git",
