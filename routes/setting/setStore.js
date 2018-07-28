@@ -37,14 +37,15 @@ module.exports = {
     }
     return {data:service}
   },
-  async listenStore(store, port){
-    var re = await listen(store, port);
+  async listenStore(store, port, opt={}){
+    var re = await listen(store, port, opt);
     if(re.code == 0){
       var service = getDbConfig().service;
       service.forEach(item=>{
         if(item.store == store){
           item.port = port;
           item.state = true;
+          item.opt = opt;
         }
       })
       await writeDbConfig({service:service})

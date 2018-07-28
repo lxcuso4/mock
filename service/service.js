@@ -6,12 +6,13 @@ const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
+const io = require('../routes/api/io')
 
 const db = path.resolve(__dirname,'../db');
 
 var serverList = {};
 
-async function listen(store, port) {
+async function listen(store, port, opt={}) {
   if(serverList[port]){
     return Promise.resolve({code:-1,msg:`${port} 已被占用`})
   }
@@ -33,9 +34,13 @@ async function listen(store, port) {
     filePath = path.join(ROOT, filePath);
     fs.readFile(filePath, 'utf8', function(err, file) {
       if (err) {
-        res.writeHead(404);
-        res.end('not found');
-        return;
+        if(opt.host){
+           proxy(req,res,store,opt)
+        }else {
+          res.writeHead(404);
+          res.end('not found');
+        }
+        return
       }
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -45,6 +50,31 @@ async function listen(store, port) {
       res.write(file, 'utf8');
       res.end();
     });
+  }
+}
+
+function proxy(req,res,store,{host,port=80,cache=true}){
+  var proxyReq = http.request({
+    host: host,
+    port: port,
+    path: req.url,
+    method:   req.method,
+    headers: req.headers,
+    timeout: 10000
+  }, function(proxyRes){
+    proxyRes.pipe(res);
+    if(cache && proxyRes.statusCode == 200){
+      io.addStream(req.url,proxyRes,store)
+    }
+  });
+  proxyReq.on('error', (e) => {
+    res.writeHead(500);
+    res.end(`proxy:${e.toString()}`);
+  });
+  if (/POST|PUT/i.test(req.method)) {
+    req.pipe(proxyReq);
+  } else {
+    proxyReq.end()
   }
 
 }

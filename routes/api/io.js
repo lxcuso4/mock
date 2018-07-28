@@ -85,6 +85,15 @@ module.exports = {
       }
     }
   },
+  // 从转发响应添加一个 json
+  async addStream(url,readStream,store){
+    var filePath = getUrlPath(url, store);
+    var writeStream = fs.createWriteStream(filePath)
+    readStream.pipe(writeStream);
+    readStream.on('end',()=> {
+      this.updateStoreConfig('add', url, store)
+    })
+  },
   async rm(url, store, rmconfig){
     store = store || defaultStore;
     var filePath = getUrlPath(url, store);

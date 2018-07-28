@@ -58,8 +58,8 @@ function reStore(req, res,next) {
 }
 
 function listenStore(req,res,next) {
-  var {store,port} = test(2,...arguments);
-  set.listenStore(store,port).then(json=>{
+  var {store,port,opt} = test(2,...arguments);
+  set.listenStore(store,port,opt).then(json=>{
     res.json(Object.assign({code:0,msg:'ok'},json))
   },err=>{
     res.locals.err = err
@@ -93,7 +93,7 @@ function test(type,req,res,next) {
     },
     port(value){
       return (value>=8080 && value<=9000)
-    }
+    },
   }
   var re = req.body;
   for(let key in re){

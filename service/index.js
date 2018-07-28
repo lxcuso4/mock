@@ -16,7 +16,7 @@ function init() {
   if (service && Array.isArray(service)) {
     service.forEach(item => {
       if (item.store && item.port && item.state) {
-        listen(item.store, item.port);
+        listen(item.store, item.port, item.opt);
       }
     });
   }
