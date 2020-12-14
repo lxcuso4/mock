@@ -14,8 +14,6 @@ const {listen, close} = require('../../service');
 const {dbPath, test, getDbConfig, writeDbConfig, copyDir,rmdir} = require('../config');
 const store = getDbConfig().store;
 
-const log = console.log.bind(console)
-
 
 
 module.exports = {

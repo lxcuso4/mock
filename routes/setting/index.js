@@ -9,7 +9,6 @@
 const express = require('express');
 const router = express.Router();
 const set = require('./setStore')
-const log = console.log.bind(console)
 router.post('/addStore',addStore,err)
 router.post('/queryStore',queryStore,err)
 router.post('/reStore',reStore,err);

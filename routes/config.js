@@ -75,9 +75,3 @@ module.exports = {
   copyDir,
   rmdir
 };
-
-// copyDir("/Users/liux/node/express-test/db/a", "/Users/liux/node/express-test/db/bbb").then(json=>{
-//   console.log(1,json)
-// },err=>{
-//   console.log(2,err)
-// })

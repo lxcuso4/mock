@@ -5,5 +5,3 @@ dist/
 npm-debug.log
 yarn-error.log
 db/*
-public/static
-public/index.html
