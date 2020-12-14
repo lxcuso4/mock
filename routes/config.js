@@ -3,7 +3,7 @@
  * @文件名称: utils.js
  * @Date: 2018/6/18 下午7:19.
  * @Author: liux
- * @Copyright（C）: 2014-2018 X-Financial Inc.   All rights reserved.
+ * @Copyright（C）: 2014-2018 liux.   All rights reserved.
  */
 const Fs = require('aw-fs');
 const path = require('path');
@@ -68,7 +68,7 @@ module.exports = {
   dbPath: dbPath,
   dbConfigPath: dbConfigPath,
   tag:'___',
-  pageCount:100,
+  pageCount:100000,
   getDbConfig,
   writeDbConfig,
   test,

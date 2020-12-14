@@ -3,7 +3,7 @@
  * @文件名称: index.js
  * @Date: 2018/6/18 下午5:10.
  * @Author: liux
- * @Copyright（C）: 2014-2018 X-Financial Inc.   All rights reserved.
+ * @Copyright（C）: 2014-2018 liux.   All rights reserved.
  */
 
 

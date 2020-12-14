@@ -3,7 +3,7 @@
  * @文件名称: index.js.js
  * @Date: 2018/6/18 下午7:15.
  * @Author: liux
- * @Copyright（C）: 2014-2018 X-Financial Inc.   All rights reserved.
+ * @Copyright（C）: 2014-2018 liux.   All rights reserved.
  */
 
 const express = require('express');

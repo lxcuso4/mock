@@ -7,6 +7,7 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const io = require('../routes/api/io')
+const utils = require('../utils/utils')
 
 const db = path.resolve(__dirname,'../db');
 
@@ -42,15 +43,18 @@ async function listen(store, port, opt={}) {
         }
         return
       }
-      res.writeHead(200, {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
-        'Transfer-Encoding': 'chunked',
-      });
-      res.write(file, 'utf8');
-      res.end();
+      response(res, file, 200)
     });
   }
+}
+function response(res, file, code) {
+  res.writeHead(code, {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Access-Control-Allow-Origin': '*',
+    'Transfer-Encoding': 'chunked',
+  });
+  res.write(file, 'utf8');
+  res.end();
 }
 
 function proxy(req,res,store,{host,port=80,cache=true}){
@@ -62,15 +66,24 @@ function proxy(req,res,store,{host,port=80,cache=true}){
     headers: req.headers,
     timeout: 10000
   }, function(proxyRes){
-    proxyRes.pipe(res);
-    if(cache && proxyRes.statusCode == 200){
-      io.addStream(req.url,proxyRes,store)
-    }
+    proxyRes.setEncoding('utf8');
+    var data = ''
+    proxyRes.on('data', (chunk) => {
+      data += chunk
+    });
+    proxyRes.on('end',()=>{
+      response(res, data, proxyRes.statusCode)
+      var json = utils.parse(data);
+      if(cache && proxyRes.statusCode == 200 && typeof json === 'object'){
+        io.add(req.url,json,store)
+      }
+    })
   });
   proxyReq.on('error', (e) => {
     res.writeHead(500);
     res.end(`proxy:${e.toString()}`);
   });
+
   if (/POST|PUT/i.test(req.method)) {
     req.pipe(proxyReq);
   } else {
